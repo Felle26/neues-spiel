@@ -1,0 +1,56 @@
+[gd_scene format=3 uid="uid://1uscl6xjeyky"]
+
+[ext_resource type="PackedScene" uid="uid://dqu1i03enuje5" path="res://player/Player.tscn" id="1_ilf7g"]
+[ext_resource type="PackedScene" uid="uid://fsvv0ot32ssi" path="res://player/HUD.tscn" id="2_l2hm1"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_l2hm1"]
+albedo_color = Color(0, 0.6919511, 0.18789962, 1)
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_ilf7g"]
+sky_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+ground_horizon_color = Color(0.66224277, 0.6717428, 0.6867428, 1)
+
+[sub_resource type="Sky" id="Sky_l2hm1"]
+sky_material = SubResource("ProceduralSkyMaterial_ilf7g")
+
+[sub_resource type="Environment" id="Environment_j7nd8"]
+background_mode = 2
+sky = SubResource("Sky_l2hm1")
+tonemap_mode = 2
+ssr_enabled = true
+ssao_enabled = true
+ssil_enabled = true
+sdfgi_enabled = true
+sdfgi_use_occlusion = true
+glow_enabled = true
+volumetric_fog_enabled = true
+volumetric_fog_albedo = Color(0.30333087, 0.61137486, 0.50315875, 1)
+volumetric_fog_anisotropy = -0.11
+volumetric_fog_length = 2.0
+adjustment_enabled = true
+
+[node name="TestLevel" type="Node3D" unique_id=1191316356]
+
+[node name="lighting" type="Node3D" parent="." unique_id=131130593]
+
+[node name="CSGBox3D" type="CSGBox3D" parent="lighting" unique_id=93800006]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, -0.5, 2.5)
+use_collision = true
+size = Vector3(53, 1, 60)
+material = SubResource("StandardMaterial3D_l2hm1")
+
+[node name="Assets" type="Node3D" parent="lighting" unique_id=1758055580]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="lighting" unique_id=2080303431]
+transform = Transform3D(-0.7512641, 0.5686767, -0.33497623, 0, 0.5075384, 0.8616292, 0.6600017, 0.64731103, -0.38129538, 0, 0, 0)
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="lighting" unique_id=876321631]
+environment = SubResource("Environment_j7nd8")
+
+[node name="Player_Stuff" type="Node3D" parent="." unique_id=1136020849]
+
+[node name="Player" parent="Player_Stuff" unique_id=1615324628 instance=ExtResource("1_ilf7g")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 1, 4)
+
+[node name="Hud" parent="Player_Stuff" unique_id=316177871 instance=ExtResource("2_l2hm1")]

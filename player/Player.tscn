@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://dqu1i03enuje5"]
+
+[ext_resource type="Script" uid="uid://1neggvt0okx4" path="res://player/player.gd" id="1_ulp21"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ehsmr"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_ehsmr"]
+
+[node name="Player" type="CharacterBody3D" unique_id=736960096]
+script = ExtResource("1_ulp21")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1468932907]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.014271915, 0)
+shape = SubResource("CapsuleShape3D_ehsmr")
+
+[node name="RayCast3D" type="RayCast3D" parent="." unique_id=2445415]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+
+[node name="Head" type="Node3D" parent="." unique_id=1203907088]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.68297195, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Head" unique_id=810149009]
+
+[node name="Hand" type="Marker3D" parent="Head/Camera3D" unique_id=660847565]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.27814227, -0.49061567)
+
+[node name="RayCast3D" type="RayCast3D" parent="Head/Camera3D/Hand" unique_id=476350182]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 0, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1513790769]
+mesh = SubResource("CapsuleMesh_ehsmr")

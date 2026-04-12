@@ -1,0 +1,39 @@
+[gd_scene format=3 uid="uid://fsvv0ot32ssi"]
+
+[ext_resource type="Script" uid="uid://e74kf2cearsk" path="res://player/hud.gd" id="1_1jg6f"]
+
+[node name="Hud" type="CanvasLayer" unique_id=316177871]
+script = ExtResource("1_1jg6f")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1959559390]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 63.0
+offset_top = -110.0
+offset_right = 382.0
+offset_bottom = -52.0
+grow_vertical = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=1372015820]
+layout_mode = 2
+
+[node name="HealthBar" type="ProgressBar" parent="MarginContainer/VBoxContainer" unique_id=35178211]
+layout_mode = 2
+value = 100.0
+rounded = true
+
+[node name="StaminaBar" type="ProgressBar" parent="MarginContainer/VBoxContainer" unique_id=1010088359]
+layout_mode = 2
+value = 100.0
+rounded = true
+
+[node name="ThrowBar" type="ProgressBar" parent="MarginContainer/VBoxContainer" unique_id=128335447]
+visible = false
+layout_mode = 2
+value = 0.0
+rounded = true
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1360629202]
+layout_mode = 2
+text = "Newspapers 1 / 8"
