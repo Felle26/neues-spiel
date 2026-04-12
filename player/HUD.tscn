@@ -37,11 +37,15 @@ rounded = true
 layout_mode = 2
 text = "Newspapers 1 / 8"
 
+[node name="ScoreLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=190335411]
+layout_mode = 2
+text = "Score: 0"
+
 [node name="PickupPrompt" type="Label" parent="." unique_id=172945810]
 visible = false
 offset_left = 836.0
 offset_top = 608.0
 offset_right = 1082.0
 offset_bottom = 644.0
-text = "Druecke F zum Aufsammeln"
+text = "Drücke F zum Aufsammeln"
 horizontal_alignment = 1

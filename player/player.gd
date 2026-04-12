@@ -30,6 +30,9 @@ var current_speed := walk_speed
 @export var max_health := 100.0
 var health := max_health
 
+#score system
+var score := 0
+
 #throwing system
 @export var max_newspapers := 10
 @export var min_throw_force := 3.0
@@ -55,6 +58,7 @@ func _ready():
 	print("HUD:", hud)
 	head = $Head
 	newspaper_count = max_newspapers
+	add_to_group("player")
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 	
@@ -159,6 +163,7 @@ func update_Hud():
 	hud.set_stamina(stamina)
 	hud.set_throw_charge(is_aiming, throw_force, max_throw_force)
 	hud.set_newspaper_count(newspaper_count, max_newspapers)
+	hud.set_score(score)
 	hud.set_pickup_prompt(current_pickup_target != null and newspaper_count < max_newspapers)
 
 func update_throw_charge(delta):
@@ -193,7 +198,7 @@ func try_pickup_newspaper():
 		collider.queue_free()
 
 func is_newspaper_pickup(collider):
-	return collider.is_in_group("newspaper_pickups") or collider.name == "NewsPaper"
+	return (collider.is_in_group("newspaper_pickups") or collider.name == "NewsPaper") and not collider.get_meta("is_scored_newspaper", false)
 
 func process_pickup_request():
 	if not pending_pickup_request:
@@ -220,3 +225,6 @@ func get_target_newspaper():
 		return collider
 
 	return null
+
+func add_score(points):
+	score += points
