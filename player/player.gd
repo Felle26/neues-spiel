@@ -35,10 +35,13 @@ var health := max_health
 @export var min_throw_force := 3.0
 @export var max_throw_force := 15.0
 @export var throw_charge_speed := 9.0
+@export var pickup_distance := 3.0
 var newspaper_count := max_newspapers
 var is_aiming := false
 var is_charging_throw := false
 var throw_force := 0.0
+var pending_pickup_request := false
+var current_pickup_target: Node3D
 
 #hard coded gravity
 var gravity := 9.8
@@ -79,11 +82,13 @@ func _physics_process(delta):
 		input_dir += transform.basis.x
 
 	input_dir = input_dir.normalized()
+	current_pickup_target = get_target_newspaper()
 
 	update_run_state(input_dir)
 	update_stamina(delta)
 	update_Hud()
 	update_throw_charge(delta)
+	process_pickup_request()
 
 	# --- Smooth Movement ---
 	var target_velocity = input_dir * current_speed
@@ -125,6 +130,8 @@ func _unhandled_input(event):
 		if is_aiming and newspaper_count > 0:
 			is_charging_throw = true
 			throw_force = min_throw_force
+	if event.is_action_pressed("interact"):
+		pending_pickup_request = true
 	if event.is_action_released("fire"):
 		if is_aiming and is_charging_throw:
 			throw_newspaper()
@@ -152,6 +159,7 @@ func update_Hud():
 	hud.set_stamina(stamina)
 	hud.set_throw_charge(is_aiming, throw_force, max_throw_force)
 	hud.set_newspaper_count(newspaper_count, max_newspapers)
+	hud.set_pickup_prompt(current_pickup_target != null and newspaper_count < max_newspapers)
 
 func update_throw_charge(delta):
 	if is_aiming and is_charging_throw:
@@ -168,7 +176,47 @@ func throw_newspaper():
 
 	spawn_parent.add_child(newspaper)
 	newspaper.global_transform = Transform3D(Basis.looking_at(throw_direction, Vector3.UP), spawn_position)
+	newspaper.add_to_group("newspaper_pickups")
 	newspaper_count -= 1
 
 	if newspaper is RigidBody3D:
 		newspaper.linear_velocity = velocity + throw_direction * throw_force
+
+func try_pickup_newspaper():
+	if newspaper_count >= max_newspapers:
+		return
+
+	var collider = current_pickup_target
+	if collider is Node3D and is_newspaper_pickup(collider):
+		newspaper_count += 1
+		current_pickup_target = null
+		collider.queue_free()
+
+func is_newspaper_pickup(collider):
+	return collider.is_in_group("newspaper_pickups") or collider.name == "NewsPaper"
+
+func process_pickup_request():
+	if not pending_pickup_request:
+		return
+
+	pending_pickup_request = false
+	try_pickup_newspaper()
+
+func get_target_newspaper():
+	var ray_origin = camera.global_position
+	var ray_end = ray_origin + -camera.global_transform.basis.z * pickup_distance
+	var query = PhysicsRayQueryParameters3D.create(ray_origin, ray_end)
+	query.exclude = [self]
+	var space_state = get_world_3d().direct_space_state
+	if space_state == null:
+		return null
+	var result = space_state.intersect_ray(query)
+
+	if result.is_empty():
+		return null
+
+	var collider = result.get("collider")
+	if collider is Node3D and is_newspaper_pickup(collider):
+		return collider
+
+	return null

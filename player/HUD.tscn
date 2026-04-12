@@ -31,9 +31,17 @@ rounded = true
 [node name="ThrowBar" type="ProgressBar" parent="MarginContainer/VBoxContainer" unique_id=128335447]
 visible = false
 layout_mode = 2
-value = 0.0
 rounded = true
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1360629202]
+[node name="newspaper" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1360629202]
 layout_mode = 2
 text = "Newspapers 1 / 8"
+
+[node name="PickupPrompt" type="Label" parent="." unique_id=172945810]
+visible = false
+offset_left = 836.0
+offset_top = 608.0
+offset_right = 1082.0
+offset_bottom = 644.0
+text = "Druecke F zum Aufsammeln"
+horizontal_alignment = 1
