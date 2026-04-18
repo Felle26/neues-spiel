@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://b4brncwhtw2if"]
 
 [ext_resource type="Script" uid="uid://cacaudk1rrn1r" path="res://assets/props/TargetZone/mailbox_delivery_zone.gd" id="1_61r4x"]
+[ext_resource type="Shader" path="res://assets/props/TargetZone/mailbox_toon.gdshader" id="2_b1d9f"]
+[ext_resource type="Shader" path="res://assets/props/TargetZone/mailbox_outline.gdshader" id="3_8v3xq"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_95afb"]
 size = Vector3(1.6, 1.2, 1.6)
@@ -18,17 +20,29 @@ albedo_color = Color(0.365907, 0.24561, 0.120709, 1)
 [sub_resource type="BoxMesh" id="BoxMesh_mailbox_post"]
 size = Vector3(0.18, 1, 0.18)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mailbox_body"]
-albedo_color = Color(0.17054, 0.194046, 0.23608, 1)
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mailbox_outline"]
+shader = ExtResource("3_8v3xq")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mailbox_post"]
+shader = ExtResource("2_b1d9f")
+shader_parameter/albedo_color = Color(0.365907, 0.24561, 0.120709, 1)
+next_pass = SubResource("ShaderMaterial_mailbox_outline")
 
 [sub_resource type="BoxMesh" id="BoxMesh_mailbox_body"]
 size = Vector3(0.95, 0.55, 0.55)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mailbox_flag"]
-albedo_color = Color(0.848111, 0.145201, 0.102267, 1)
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mailbox_body"]
+shader = ExtResource("2_b1d9f")
+shader_parameter/albedo_color = Color(0.17054, 0.194046, 0.23608, 1)
+next_pass = SubResource("ShaderMaterial_mailbox_outline")
 
 [sub_resource type="BoxMesh" id="BoxMesh_mailbox_flag"]
 size = Vector3(0.08, 0.35, 0.08)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mailbox_flag"]
+shader = ExtResource("2_b1d9f")
+shader_parameter/albedo_color = Color(0.848111, 0.145201, 0.102267, 1)
+next_pass = SubResource("ShaderMaterial_mailbox_outline")
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_mailbox_focus"]
 size = Vector3(1.1, 1.25, 0.8)
@@ -49,17 +63,17 @@ mesh = SubResource("BoxMesh_v1v6s")
 
 [node name="Post" type="MeshInstance3D" parent="MailboxVisual" unique_id=1353023405]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.35, 1.7, 0)
-material_override = SubResource("StandardMaterial3D_mailbox_post")
+material_override = SubResource("ShaderMaterial_mailbox_post")
 mesh = SubResource("BoxMesh_mailbox_post")
 
 [node name="Body" type="MeshInstance3D" parent="MailboxVisual" unique_id=794306320]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1, 2.2, 0)
-material_override = SubResource("StandardMaterial3D_mailbox_body")
+material_override = SubResource("ShaderMaterial_mailbox_body")
 mesh = SubResource("BoxMesh_mailbox_body")
 
 [node name="Flag" type="MeshInstance3D" parent="MailboxVisual" unique_id=895416173]
 transform = Transform3D(0.866025, 0.5, 0, -0.5, 0.866025, 0, 0, 0, 1, 0.62, 2.35, 0)
-material_override = SubResource("StandardMaterial3D_mailbox_flag")
+material_override = SubResource("ShaderMaterial_mailbox_flag")
 mesh = SubResource("BoxMesh_mailbox_flag")
 
 [node name="MailboxFocusTarget" type="StaticBody3D" parent="MailboxVisual" unique_id=1532664472]

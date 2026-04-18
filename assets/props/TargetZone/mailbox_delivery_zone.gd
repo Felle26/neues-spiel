@@ -3,8 +3,7 @@ extends Area3D
 const PLAYER_GROUP := "player"
 const MAILBOX_ZONE_GROUP := "mailbox_delivery_zone"
 const MAILBOX_FOCUS_TARGET_GROUP := "mailbox_focus_target"
-const HIGHLIGHT_EMISSION := Color(1.0, 0.92, 0.45)
-const HIGHLIGHT_ENERGY := 0.7
+const SHADER_HIGHLIGHT_STRENGTH := 0.8
 
 @export var score_value := 150
 @export var required_hold_time := 2.0
@@ -106,10 +105,16 @@ func set_highlighted(is_highlighted):
 			continue
 
 		var material = mesh_instance.material_override
-		if material == null or not material is StandardMaterial3D:
+		if material == null:
 			continue
 
-		var standard_material = material as StandardMaterial3D
-		standard_material.emission_enabled = should_highlight
-		standard_material.emission = HIGHLIGHT_EMISSION
-		standard_material.emission_energy_multiplier = HIGHLIGHT_ENERGY if should_highlight else 0.0
+		if material is ShaderMaterial:
+			var shader_material = material as ShaderMaterial
+			shader_material.set_shader_parameter("highlight_strength", SHADER_HIGHLIGHT_STRENGTH if should_highlight else 0.0)
+			continue
+
+		if material is StandardMaterial3D:
+			var standard_material = material as StandardMaterial3D
+			standard_material.emission_enabled = should_highlight
+			standard_material.emission = Color(1.0, 0.92, 0.45)
+			standard_material.emission_energy_multiplier = 0.7 if should_highlight else 0.0
