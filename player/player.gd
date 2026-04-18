@@ -192,9 +192,19 @@ func update_Hud():
 
 func update_mailbox_focus():
 	var focused_mailbox = get_focused_mailbox_zone()
+	update_mailbox_highlights(focused_mailbox)
 	if focused_mailbox != current_mailbox_zone:
 		mailbox_hold_progress = 0.0
 	current_mailbox_zone = focused_mailbox
+
+
+func update_mailbox_highlights(focused_mailbox):
+	for zone in active_mailbox_zones:
+		if not is_instance_valid(zone):
+			continue
+
+		if zone.has_method("set_highlighted"):
+			zone.set_highlighted(zone == focused_mailbox)
 
 
 func get_focused_mailbox_zone():
@@ -202,11 +212,11 @@ func get_focused_mailbox_zone():
 		return null
 
 	var ray_origin = camera.global_position
-	var focus_distance = max(mailbox_focus_distance, pickup_distance)
-	var ray_end = ray_origin + -camera.global_transform.basis.z * focus_distance
+	var ray_end = ray_origin + -camera.global_transform.basis.z * mailbox_focus_distance
 	var query = PhysicsRayQueryParameters3D.create(ray_origin, ray_end)
 	query.exclude = [self]
-	query.collide_with_areas = true
+	query.collide_with_areas = false
+	query.collide_with_bodies = true
 	var space_state = get_world_3d().direct_space_state
 	if space_state == null:
 		return null
@@ -216,42 +226,20 @@ func get_focused_mailbox_zone():
 		return null
 
 	var collider = result.get("collider")
-	if collider is Area3D and active_mailbox_zones.has(collider):
-		if collider.has_method("can_accept_delivery") and not collider.can_accept_delivery():
-			active_mailbox_zones.erase(collider)
-			return null
-		return collider
-
-	return get_best_aligned_mailbox_zone(focus_distance)
-
-
-func get_best_aligned_mailbox_zone(max_distance):
-	var camera_forward = -camera.global_transform.basis.z.normalized()
-	var best_zone: Area3D = null
-	var best_score := -1.0
+	if not collider is Node:
+		return null
 
 	for zone in active_mailbox_zones:
 		if not is_instance_valid(zone):
 			continue
 
-		if zone.has_method("can_accept_delivery") and not zone.can_accept_delivery():
-			continue
+		if zone.has_method("is_focus_target") and zone.is_focus_target(collider):
+			if zone.has_method("can_accept_delivery") and not zone.can_accept_delivery():
+				active_mailbox_zones.erase(zone)
+				return null
+			return zone
 
-		var to_zone = zone.global_position - camera.global_position
-		var distance = to_zone.length()
-		if distance <= 0.01 or distance > max_distance:
-			continue
-
-		var alignment = camera_forward.dot(to_zone / distance)
-		if alignment < 0.8:
-			continue
-
-		var score = alignment - distance * 0.02
-		if score > best_score:
-			best_score = score
-			best_zone = zone
-
-	return best_zone
+	return null
 
 func update_throw_charge(delta):
 	if is_aiming and is_charging_throw:
@@ -344,6 +332,8 @@ func complete_mailbox_delivery():
 		delivery_points = current_mailbox_zone.get_delivery_score()
 	add_score(delivery_points)
 	active_mailbox_zones.erase(current_mailbox_zone)
+	if current_mailbox_zone.has_method("set_highlighted"):
+		current_mailbox_zone.set_highlighted(false)
 
 	current_mailbox_zone = null
 	mailbox_hold_progress = 0.0
@@ -360,6 +350,8 @@ func enter_mailbox_zone(zone):
 
 func exit_mailbox_zone(zone):
 	active_mailbox_zones.erase(zone)
+	if zone != null and zone.has_method("set_highlighted"):
+		zone.set_highlighted(false)
 
 	if zone == current_mailbox_zone:
 		current_mailbox_zone = null

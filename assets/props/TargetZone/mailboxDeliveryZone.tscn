@@ -30,6 +30,9 @@ albedo_color = Color(0.848111, 0.145201, 0.102267, 1)
 [sub_resource type="BoxMesh" id="BoxMesh_mailbox_flag"]
 size = Vector3(0.08, 0.35, 0.08)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_mailbox_focus"]
+size = Vector3(1.1, 1.25, 0.8)
+
 [node name="MailboxDeliveryZone" type="Area3D" unique_id=1406237442]
 script = ExtResource("1_61r4x")
 
@@ -58,3 +61,9 @@ mesh = SubResource("BoxMesh_mailbox_body")
 transform = Transform3D(0.866025, 0.5, 0, -0.5, 0.866025, 0, 0, 0, 1, 0.62, 2.35, 0)
 material_override = SubResource("StandardMaterial3D_mailbox_flag")
 mesh = SubResource("BoxMesh_mailbox_flag")
+
+[node name="MailboxFocusTarget" type="StaticBody3D" parent="MailboxVisual" unique_id=1532664472]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.12, 2.0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MailboxVisual/MailboxFocusTarget" unique_id=1285387174]
+shape = SubResource("BoxShape3D_mailbox_focus")
