@@ -1,8 +1,9 @@
 [gd_scene format=3 uid="uid://1uscl6xjeyky"]
 
 [ext_resource type="PackedScene" uid="uid://dqu1i03enuje5" path="res://player/Player.tscn" id="1_ilf7g"]
-[ext_resource type="PackedScene" uid="uid://dwpdumtbtx4qe" path="res://assets/props/TargetZone/newspaperTargetZone.tscn" id="1_j7nd8"]
 [ext_resource type="PackedScene" uid="uid://fsvv0ot32ssi" path="res://player/HUD.tscn" id="2_l2hm1"]
+[ext_resource type="PackedScene" uid="uid://dwpdumtbtx4qe" path="res://assets/props/TargetZone/newspaperTargetZone.tscn" id="3_u8n7x"]
+[ext_resource type="PackedScene" uid="uid://b4brncwhtw2if" path="res://assets/props/TargetZone/mailboxDeliveryZone.tscn" id="4_2gd7m"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_l2hm1"]
 albedo_color = Color(0, 0.6919511, 0.18789962, 1)
@@ -48,16 +49,35 @@ material = SubResource("StandardMaterial3D_l2hm1")
 
 [node name="Assets" type="Node3D" parent="lighting" unique_id=1758055580]
 
+[node name="NewspaperTargetZone" parent="lighting/Assets" unique_id=1661924701 instance=ExtResource("3_u8n7x")]
+transform = Transform3D(0.99990845, 0, 0.013531496, 0, 1, 0, -0.013531496, 0, 0.99990845, -17.0838, 0, 28.9937)
+
+[node name="NewspaperTargetZone2" parent="lighting/Assets" unique_id=667454330 instance=ExtResource("3_u8n7x")]
+transform = Transform3D(0.99990845, 0, 0.013531496, 0, 1, 0, -0.013531496, 0, 0.99990845, -6.671854, 0, 28.9937)
+
+[node name="NewspaperTargetZone3" parent="lighting/Assets" unique_id=1090933938 instance=ExtResource("3_u8n7x")]
+transform = Transform3D(0.99990845, 0, 0.013531496, 0, 1, 0, -0.013531496, 0, 0.99990845, -11.148846, 0, 28.9937)
+
+[node name="MailboxDeliveryZone" parent="lighting/Assets" unique_id=706588127 instance=ExtResource("4_2gd7m")]
+transform = Transform3D(0.99990845, 0, 0.013531496, 0, 1, 0, -0.013531496, 0, 0.99990845, -18.0618, 0, 22.1903)
+
+[node name="MailboxCluster" type="Node3D" parent="lighting/Assets" unique_id=183640091]
+
+[node name="MailboxDeliveryZoneA" parent="lighting/Assets/MailboxCluster" unique_id=1408131023 instance=ExtResource("4_2gd7m")]
+transform = Transform3D(0.99990845, 0, 0.013531496, 0, 1, 0, -0.013531496, 0, 0.99990845, -24.4375, 0, 22.3057)
+
+[node name="MailboxDeliveryZoneB" parent="lighting/Assets/MailboxCluster" unique_id=1019627658 instance=ExtResource("4_2gd7m")]
+transform = Transform3D(0.99990845, 0, 0.013531496, 0, 1, 0, -0.013531496, 0, 0.99990845, -22.6232, 0, 22.2811)
+
+[node name="MailboxDeliveryZoneC" parent="lighting/Assets/MailboxCluster" unique_id=650945221 instance=ExtResource("4_2gd7m")]
+transform = Transform3D(0.99990845, 0, 0.013531496, 0, 1, 0, -0.013531496, 0, 0.99990845, -20.7817, 0, 22.2562)
+
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="lighting" unique_id=2080303431]
 transform = Transform3D(-0.7512641, 0.5686767, -0.33497623, 0, 0.5075384, 0.8616292, 0.6600017, 0.64731103, -0.38129538, 0, 0, 0)
 shadow_enabled = true
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="lighting" unique_id=876321631]
 environment = SubResource("Environment_j7nd8")
-
-[node name="Area3D" parent="lighting" unique_id=667454330 instance=ExtResource("1_j7nd8")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, 31)
-script = null
 
 [node name="Player_Stuff" type="Node3D" parent="." unique_id=1136020849]
 

@@ -1,6 +1,8 @@
 extends Area3D
 
 @export var score_value := 100
+const NEWSPAPER_GROUP := "newspaper"
+var has_triggered := false
 
 
 func _ready():
@@ -8,8 +10,14 @@ func _ready():
 
 
 func _on_body_entered(body):
+	if has_triggered:
+		return
+
 	if not is_valid_newspaper(body):
 		return
+
+	has_triggered = true
+	set_deferred("monitoring", false)
 
 	body.set_meta("is_scored_newspaper", true)
 	body.remove_from_group("newspaper_pickups")
@@ -23,7 +31,7 @@ func is_valid_newspaper(body):
 	if not body is RigidBody3D:
 		return false
 
-	if body.name != "NewsPaper":
+	if not body.is_in_group(NEWSPAPER_GROUP):
 		return false
 
 	if body.get_meta("is_scored_newspaper", false):

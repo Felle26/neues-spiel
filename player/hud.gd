@@ -31,4 +31,8 @@ func set_score(value):
 	score_label.text = "Score: %d" % value
 
 func set_pickup_prompt(visible_state):
+	set_interact_prompt("Druecke F zum Aufsammeln", visible_state)
+
+func set_interact_prompt(text, visible_state):
+	pickup_prompt.text = text
 	pickup_prompt.visible = visible_state

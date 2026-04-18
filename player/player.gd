@@ -4,6 +4,8 @@ extends CharacterBody3D
 @onready var hand: Marker3D = $Head/Camera3D/Hand
 
 const NEWSPAPER_SCENE := preload("res://assets/props/newspaper/newsPaper.tscn")
+const NEWSPAPER_GROUP := "newspaper"
+const DEFAULT_MAILBOX_HOLD_TIME := 2.0
 
 #walking system
 var max_speed := 5.0
@@ -39,12 +41,16 @@ var score := 0
 @export var max_throw_force := 15.0
 @export var throw_charge_speed := 9.0
 @export var pickup_distance := 3.0
+@export var mailbox_focus_distance := 6.0
 var newspaper_count := max_newspapers
 var is_aiming := false
 var is_charging_throw := false
 var throw_force := 0.0
 var pending_pickup_request := false
 var current_pickup_target: Node3D
+var current_mailbox_zone: Area3D
+var active_mailbox_zones: Array[Area3D] = []
+var mailbox_hold_progress := 0.0
 
 #hard coded gravity
 var gravity := 9.8
@@ -87,12 +93,14 @@ func _physics_process(delta):
 
 	input_dir = input_dir.normalized()
 	current_pickup_target = get_target_newspaper()
+	update_mailbox_focus()
 
 	update_run_state(input_dir)
 	update_stamina(delta)
 	update_Hud()
 	update_throw_charge(delta)
 	process_pickup_request()
+	process_mailbox_delivery(delta)
 
 	# --- Smooth Movement ---
 	var target_velocity = input_dir * current_speed
@@ -135,7 +143,8 @@ func _unhandled_input(event):
 			is_charging_throw = true
 			throw_force = min_throw_force
 	if event.is_action_pressed("interact"):
-		pending_pickup_request = true
+		if current_mailbox_zone == null:
+			pending_pickup_request = true
 	if event.is_action_released("fire"):
 		if is_aiming and is_charging_throw:
 			throw_newspaper()
@@ -164,7 +173,85 @@ func update_Hud():
 	hud.set_throw_charge(is_aiming, throw_force, max_throw_force)
 	hud.set_newspaper_count(newspaper_count, max_newspapers)
 	hud.set_score(score)
-	hud.set_pickup_prompt(current_pickup_target != null and newspaper_count < max_newspapers)
+
+	var pickup_prompt_visible = current_pickup_target != null and newspaper_count < max_newspapers
+	if current_mailbox_zone != null:
+		if newspaper_count <= 0:
+			hud.set_interact_prompt("Keine Zeitung zum Zustellen", true)
+		else:
+			var required_hold_time = get_mailbox_hold_time()
+			var hold_percentage = 0.0
+			if required_hold_time > 0.0:
+				hold_percentage = clamp((mailbox_hold_progress / required_hold_time) * 100.0, 0.0, 100.0)
+			hud.set_interact_prompt("Halte F zum Zustellen (%.0f%%)" % hold_percentage, true)
+	elif not active_mailbox_zones.is_empty():
+		hud.set_interact_prompt("Schaue einen Briefkasten an", true)
+	else:
+		hud.set_interact_prompt("Druecke F zum Aufsammeln", pickup_prompt_visible)
+
+
+func update_mailbox_focus():
+	var focused_mailbox = get_focused_mailbox_zone()
+	if focused_mailbox != current_mailbox_zone:
+		mailbox_hold_progress = 0.0
+	current_mailbox_zone = focused_mailbox
+
+
+func get_focused_mailbox_zone():
+	if active_mailbox_zones.is_empty():
+		return null
+
+	var ray_origin = camera.global_position
+	var focus_distance = max(mailbox_focus_distance, pickup_distance)
+	var ray_end = ray_origin + -camera.global_transform.basis.z * focus_distance
+	var query = PhysicsRayQueryParameters3D.create(ray_origin, ray_end)
+	query.exclude = [self]
+	query.collide_with_areas = true
+	var space_state = get_world_3d().direct_space_state
+	if space_state == null:
+		return null
+
+	var result = space_state.intersect_ray(query)
+	if result.is_empty():
+		return null
+
+	var collider = result.get("collider")
+	if collider is Area3D and active_mailbox_zones.has(collider):
+		if collider.has_method("can_accept_delivery") and not collider.can_accept_delivery():
+			active_mailbox_zones.erase(collider)
+			return null
+		return collider
+
+	return get_best_aligned_mailbox_zone(focus_distance)
+
+
+func get_best_aligned_mailbox_zone(max_distance):
+	var camera_forward = -camera.global_transform.basis.z.normalized()
+	var best_zone: Area3D = null
+	var best_score := -1.0
+
+	for zone in active_mailbox_zones:
+		if not is_instance_valid(zone):
+			continue
+
+		if zone.has_method("can_accept_delivery") and not zone.can_accept_delivery():
+			continue
+
+		var to_zone = zone.global_position - camera.global_position
+		var distance = to_zone.length()
+		if distance <= 0.01 or distance > max_distance:
+			continue
+
+		var alignment = camera_forward.dot(to_zone / distance)
+		if alignment < 0.8:
+			continue
+
+		var score = alignment - distance * 0.02
+		if score > best_score:
+			best_score = score
+			best_zone = zone
+
+	return best_zone
 
 func update_throw_charge(delta):
 	if is_aiming and is_charging_throw:
@@ -181,6 +268,8 @@ func throw_newspaper():
 
 	spawn_parent.add_child(newspaper)
 	newspaper.global_transform = Transform3D(Basis.looking_at(throw_direction, Vector3.UP), spawn_position)
+	if not newspaper.is_in_group(NEWSPAPER_GROUP):
+		newspaper.add_to_group(NEWSPAPER_GROUP)
 	newspaper.add_to_group("newspaper_pickups")
 	newspaper_count -= 1
 
@@ -198,7 +287,7 @@ func try_pickup_newspaper():
 		collider.queue_free()
 
 func is_newspaper_pickup(collider):
-	return (collider.is_in_group("newspaper_pickups") or collider.name == "NewsPaper") and not collider.get_meta("is_scored_newspaper", false)
+	return (collider.is_in_group("newspaper_pickups") or collider.is_in_group(NEWSPAPER_GROUP)) and not collider.get_meta("is_scored_newspaper", false)
 
 func process_pickup_request():
 	if not pending_pickup_request:
@@ -206,6 +295,75 @@ func process_pickup_request():
 
 	pending_pickup_request = false
 	try_pickup_newspaper()
+
+func process_mailbox_delivery(delta):
+	if current_mailbox_zone == null:
+		mailbox_hold_progress = 0.0
+		return
+
+	if newspaper_count <= 0:
+		mailbox_hold_progress = 0.0
+		return
+
+	if Input.is_action_pressed("interact"):
+		mailbox_hold_progress += delta
+		if mailbox_hold_progress >= get_mailbox_hold_time():
+			complete_mailbox_delivery()
+			mailbox_hold_progress = 0.0
+	else:
+		mailbox_hold_progress = 0.0
+
+func get_mailbox_hold_time():
+	if current_mailbox_zone != null and current_mailbox_zone.has_method("get_required_hold_time"):
+		return max(current_mailbox_zone.get_required_hold_time(), 0.01)
+
+	return DEFAULT_MAILBOX_HOLD_TIME
+
+func complete_mailbox_delivery():
+	if current_mailbox_zone == null:
+		return
+
+	if newspaper_count <= 0:
+		return
+
+	if current_mailbox_zone.has_method("can_accept_delivery") and not current_mailbox_zone.can_accept_delivery():
+		active_mailbox_zones.erase(current_mailbox_zone)
+		current_mailbox_zone = null
+		mailbox_hold_progress = 0.0
+		return
+
+	if current_mailbox_zone.has_method("mark_delivered") and not current_mailbox_zone.mark_delivered():
+		active_mailbox_zones.erase(current_mailbox_zone)
+		current_mailbox_zone = null
+		mailbox_hold_progress = 0.0
+		return
+
+	newspaper_count -= 1
+	var delivery_points = 0
+	if current_mailbox_zone.has_method("get_delivery_score"):
+		delivery_points = current_mailbox_zone.get_delivery_score()
+	add_score(delivery_points)
+	active_mailbox_zones.erase(current_mailbox_zone)
+
+	current_mailbox_zone = null
+	mailbox_hold_progress = 0.0
+
+func enter_mailbox_zone(zone):
+	if zone == null:
+		return
+
+	if not zone is Area3D:
+		return
+
+	if not active_mailbox_zones.has(zone):
+		active_mailbox_zones.append(zone)
+
+func exit_mailbox_zone(zone):
+	active_mailbox_zones.erase(zone)
+
+	if zone == current_mailbox_zone:
+		current_mailbox_zone = null
+		mailbox_hold_progress = 0.0
 
 func get_target_newspaper():
 	var ray_origin = camera.global_position
