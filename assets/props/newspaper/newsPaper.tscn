@@ -1,10 +1,31 @@
 [gd_scene format=3 uid="uid://dllom3logbe3l"]
 
+[ext_resource type="Shader" uid="uid://bixotf8qb7kb8" path="res://assets/props/TargetZone/mailbox_outline.gdshader" id="1_ja3b2"]
+[ext_resource type="Shader" uid="uid://dles7n61och3n" path="res://assets/props/TargetZone/mailbox_toon.gdshader" id="1_tdrdq"]
+
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_0f5ly"]
 radius = 0.25
 height = 1.0
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_g4y67"]
+render_priority = 0
+shader = ExtResource("1_ja3b2")
+shader_parameter/outline_size = 0.03
+shader_parameter/outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ja3b2"]
+render_priority = 0
+next_pass = SubResource("ShaderMaterial_g4y67")
+shader = ExtResource("1_tdrdq")
+shader_parameter/albedo_color = Color(1, 1, 1, 1)
+shader_parameter/shade_steps = 3.0
+shader_parameter/specular_intensity = 0.2
+shader_parameter/rim_strength = 0.4
+shader_parameter/rim_width = 0.5
+shader_parameter/highlight_strength = 0.0
+
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_tdrdq"]
+material = SubResource("ShaderMaterial_ja3b2")
 radius = 0.25
 height = 1.0
 

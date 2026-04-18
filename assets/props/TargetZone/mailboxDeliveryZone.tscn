@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://b4brncwhtw2if"]
 
 [ext_resource type="Script" uid="uid://cacaudk1rrn1r" path="res://assets/props/TargetZone/mailbox_delivery_zone.gd" id="1_61r4x"]
-[ext_resource type="Shader" path="res://assets/props/TargetZone/mailbox_toon.gdshader" id="2_b1d9f"]
-[ext_resource type="Shader" path="res://assets/props/TargetZone/mailbox_outline.gdshader" id="3_8v3xq"]
+[ext_resource type="Shader" uid="uid://dles7n61och3n" path="res://assets/props/TargetZone/mailbox_toon.gdshader" id="2_b1d9f"]
+[ext_resource type="Shader" uid="uid://bixotf8qb7kb8" path="res://assets/props/TargetZone/mailbox_outline.gdshader" id="3_8v3xq"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_95afb"]
 size = Vector3(1.6, 1.2, 1.6)
@@ -14,35 +14,60 @@ albedo_color = Color(0.723391, 0.104058, 0.104058, 1)
 [sub_resource type="BoxMesh" id="BoxMesh_v1v6s"]
 size = Vector3(1.6, 1.2, 1.6)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mailbox_post"]
-albedo_color = Color(0.365907, 0.24561, 0.120709, 1)
-
-[sub_resource type="BoxMesh" id="BoxMesh_mailbox_post"]
-size = Vector3(0.18, 1, 0.18)
-
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_mailbox_outline"]
+render_priority = 0
 shader = ExtResource("3_8v3xq")
+shader_parameter/outline_size = 0.03
+shader_parameter/outline_color = Color(0, 0, 0, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_mailbox_post"]
+render_priority = 0
+next_pass = SubResource("ShaderMaterial_mailbox_outline")
 shader = ExtResource("2_b1d9f")
 shader_parameter/albedo_color = Color(0.365907, 0.24561, 0.120709, 1)
+shader_parameter/shade_steps = 3.0
+shader_parameter/specular_intensity = 0.2
+shader_parameter/rim_strength = 0.4
+shader_parameter/rim_width = 0.5
+shader_parameter/highlight_strength = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_k6i32"]
+render_priority = 0
+shader = ExtResource("3_8v3xq")
+shader_parameter/outline_size = 0.03
+shader_parameter/outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_mailbox_post"]
+material = SubResource("ShaderMaterial_k6i32")
+size = Vector3(0.18, 1, 0.18)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mailbox_body"]
+render_priority = 0
 next_pass = SubResource("ShaderMaterial_mailbox_outline")
+shader = ExtResource("2_b1d9f")
+shader_parameter/albedo_color = Color(0.17054, 0.194046, 0.23608, 1)
+shader_parameter/shade_steps = 3.0
+shader_parameter/specular_intensity = 0.2
+shader_parameter/rim_strength = 0.4
+shader_parameter/rim_width = 0.5
+shader_parameter/highlight_strength = 0.0
 
 [sub_resource type="BoxMesh" id="BoxMesh_mailbox_body"]
 size = Vector3(0.95, 0.55, 0.55)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_mailbox_body"]
-shader = ExtResource("2_b1d9f")
-shader_parameter/albedo_color = Color(0.17054, 0.194046, 0.23608, 1)
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_mailbox_flag"]
+render_priority = 0
 next_pass = SubResource("ShaderMaterial_mailbox_outline")
+shader = ExtResource("2_b1d9f")
+shader_parameter/albedo_color = Color(0.848111, 0.145201, 0.102267, 1)
+shader_parameter/shade_steps = 3.0
+shader_parameter/specular_intensity = 0.2
+shader_parameter/rim_strength = 0.4
+shader_parameter/rim_width = 0.5
+shader_parameter/highlight_strength = 0.0
 
 [sub_resource type="BoxMesh" id="BoxMesh_mailbox_flag"]
 size = Vector3(0.08, 0.35, 0.08)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_mailbox_flag"]
-shader = ExtResource("2_b1d9f")
-shader_parameter/albedo_color = Color(0.848111, 0.145201, 0.102267, 1)
-next_pass = SubResource("ShaderMaterial_mailbox_outline")
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_mailbox_focus"]
 size = Vector3(1.1, 1.25, 0.8)
@@ -77,7 +102,7 @@ material_override = SubResource("ShaderMaterial_mailbox_flag")
 mesh = SubResource("BoxMesh_mailbox_flag")
 
 [node name="MailboxFocusTarget" type="StaticBody3D" parent="MailboxVisual" unique_id=1532664472]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.12, 2.0, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.12, 2, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="MailboxVisual/MailboxFocusTarget" unique_id=1285387174]
 shape = SubResource("BoxShape3D_mailbox_focus")
